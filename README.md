@@ -50,7 +50,7 @@ but downloading and reading the script first is the better habit for a script th
    1. Back up `/etc/ssh`, create the user (if needed), install the key, write the config.
       SSH listens on the **old and the new port** at the same time.
    2. The script asks you to open a **second terminal** and log in on the new port.
-      Type `yes` within 180 seconds. If you do not, the configuration is **rolled back automatically**.
+      Type `yes` within 300 seconds. If you do not, the configuration is **rolled back automatically**.
    3. After `yes`, the old port is closed, then fail2ban is installed and configured.
 5. **Final report** - key paths, firewall reminders, useful commands.
 
@@ -169,7 +169,7 @@ If bans ever get lost, `--f2b-sync` re-applies the blacklist.
 - **Validation:** the config is checked with `sshd -t`, and the effective result is checked with `sshd -T`
   (password login must really be off, even if some other file tries to override it).
 - **Two-phase port change:** old and new ports work together until you confirm the new login.
-- **Automatic rollback:** a systemd timer (`ssh-setup-watchdog`) restores the old configuration after 180 seconds
+- **Automatic rollback:** a systemd timer (`ssh-setup-watchdog`) restores the old configuration after 300 seconds
   if you do not confirm. It also fires if your connection drops while the script runs.
 - **Manual rollback:** `sudo bash ssh-setup.sh --rollback` restores the previous SSH configuration.
   (It does not remove the added public key, the firewall rule or fail2ban.)
