@@ -27,7 +27,7 @@ readonly F2B_FILTER="/etc/fail2ban/filter.d/ssh-setup-blacklist.conf"
 readonly F2B_BLACKLIST_LOG="/var/log/ssh-setup-blacklist.log"
 readonly F2B_BLACKLIST_JAIL="ssh-setup-blacklist"
 
-readonly CONFIRM_TIMEOUT=180 # seconds the admin has to confirm the new login works
+readonly CONFIRM_TIMEOUT=300 # seconds the admin has to confirm the new login works
 
 DRY_RUN=0
 INPUT_SRC="${SSH_SETUP_INPUT:-/dev/tty}"
@@ -726,6 +726,7 @@ verify_effective() {
 
 do_rollback_now() {
     err "Rolling back SSH configuration..."
+    systemctl stop ssh-setup-watchdog.timer 2>/dev/null || true
     "$STATE_DIR/rollback.sh" || true
 }
 
@@ -765,6 +766,7 @@ apply_ssh() {
     if [ "$FW_AUTO" -eq 1 ]; then fw_open; fi
 
     write_socket_dropin "${phase1[@]}"
+    systemctl stop ssh-setup-watchdog.timer 2>/dev/null || true
     systemd-run --quiet --unit=ssh-setup-watchdog --on-active="${CONFIRM_TIMEOUT}s" "$STATE_DIR/rollback.sh" \
         || warn "Could not schedule the automatic rollback timer."
     restart_sshd
